@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+		<script>
+			var xOffset = 0, yOffset = 0;
+			Math.clamp = function(number, min, max) {
+				return Math.max(min, Math.min(number, max));
+			}
+			window.onload = function startup() {
+			  	var el = document.getElementById("stick");
+			  	el.addEventListener("touchmove", handleMove, false);
+			  	window.originalPosition = [el.offsetLeft + el.offsetWidth / 2, el.offsetTop + el.offsetHeight / 2];
+				send_requests();
+			}
+			function handleMove(event){
+			  	var el = document.getElementById("stick");
+				event.preventDefault();
+				var touch = event.touches[0];
+				var realY = Math.clamp(Math.floor(touch.pageY), window.originalPosition[1] - screen.width / 2, window.originalPosition[1] + screen.width / 2);
+				var realX = Math.clamp(Math.floor(touch.pageX), 0, screen.width);
+				el.style.top = "calc("+Math.floor(realY) + "px - 12.5vw)";
+				el.style.left = "calc("+Math.floor(realX) + "px - 12.5vw)";
+				el.style.bottom = "auto";
+				el.style.right = "auto";
+				xOffset = (realX - window.originalPosition[0]) / screen.width * 2;
+				yOffset = -(realY - window.originalPosition[1]) / screen.width * 2;
+				document.getElementById("text").innerHTML = xOffset.toFixed(2).toString()+", "+yOffset.toFixed(2).toString()
+			}
+			function send_requests(){
+				xhttp = new XMLHttpRequest();
+				xhttp.open("GET", "/fahre?geschwindigkeit="+(Math.floor(yOffset*1024)).toString()+"&grad="+(Math.floor(90+xOffset*40)).toString(), true);
+				xhttp.onload = send_requests;
+				xhttp.send();
+			}
+		</script>
+	</head>
+	<body>
+		<h1 id="text" style="text-align: center">0, 0</h1>
+		<div id="stick" style="
+			border-radius: 50%;
+			width: 25vw;
+			height: 25vw;
+			margin: auto;
+			position: absolute;
+			top: 0; left: 0; bottom: 0; right: 0;
+			background-color: red;
+		"></div>
+	</body>
+</html>
+
